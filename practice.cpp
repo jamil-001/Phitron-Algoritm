@@ -1,41 +1,41 @@
 #include<bits/stdc++.h>
 using namespace std;
-//directed graph detect cycle use dfs
-vector<int>adj_list[105];
-bool vis[105];
-bool pathvis[105];
-bool cycle;
-void dfs(int src){
-     vis[src] = true;
-     pathvis[src] = true;
-     for(int child: adj_list[src]){
-        if(vis[child] && pathvis[child])
-          cycle = true;
-        if(!vis[child]){
-            dfs(child);
+vector<pair<int,int>> adj_list[105];
+int dis[105];
+void dijkstra(int src){
+    priority_queue<pair<int,int>,vector<pair<int,int>>,greater<pair<int,int>>> pq;
+     pq.push({0,src});
+     dis[src] = 0;
+     while(!pq.empty()){
+        pair<int,int> par = pq.top();
+        pq.pop();
+        int par_node = par.second;
+        int par_dis = par.first;
+        for(auto child : adj_list[par_node]){
+            int child_node = child.first;
+            int child_dis = child.second;
+            if(par_dis + child_dis < dis[child_node]){
+                dis[child_node] = par_dis + child_dis;
+                pq.push({dis[child_node],child_node});
+            }
         }
      }
-     pathvis[src] = false;
 }
 int main(){
-    int n,e;
-    cin>>n>>e;
+    int n ,e;
+    cin >> n >> e;
     while(e--){
-        int a,b;
-        cin>>a >>b;
-        adj_list[a].push_back(b);
-        
+        int a,b,c;
+        cin >> a >> b >> c;
+        adj_list[a].push_back({b,c});
+        adj_list[b].push_back({a,c});
     }
-    memset(vis,false,sizeof(vis));
-    memset(pathvis,false,sizeof(pathvis));
-    for(int i =0;i<n;i++){
-        if(!vis[i]){
-            dfs(i);
-        }
+    for(int i=0;i<n;i++){
+        dis[i] = INT_MAX;
     }
-    if(cycle)
-       cout<<"cycle"<<endl;
-    else
-       cout <<"No cycle" << endl;
+    dijkstra(0);
+    for(int i=0;i<n;i++){
+        cout << dis[i] << endl;
+    }
     return 0;
 }
