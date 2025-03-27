@@ -1,41 +1,54 @@
 #include<bits/stdc++.h>
 using namespace std;
-vector<pair<int,int>> adj_list[105];
-int dis[105];
-void dijkstra(int src){
-    priority_queue<pair<int,int>,vector<pair<int,int>>,greater<pair<int,int>>> pq;
-     pq.push({0,src});
-     dis[src] = 0;
-     while(!pq.empty()){
-        pair<int,int> par = pq.top();
-        pq.pop();
-        int par_node = par.second;
-        int par_dis = par.first;
-        for(auto child : adj_list[par_node]){
-            int child_node = child.first;
-            int child_dis = child.second;
-            if(par_dis + child_dis < dis[child_node]){
-                dis[child_node] = par_dis + child_dis;
-                pq.push({dis[child_node],child_node});
-            }
-        }
-     }
+int par[1005];
+int group_size[1005];
+int find(int node){
+    if(par[node ] == -1){
+        return node;
+    }
+    int leader = find(par[node]);
+    par[node] = leader;
+    return leader;
+}
+void dsa_union(int node1,int node2){
+int leader1 = find(node1);
+int leader2 = find(node2);
+if(group_size[leader1] >= group_size[leader2]){
+    par[leader2] = leader1;
+    group_size[leader2] += group_size[leader1];
+
+}else{
+    par[leader1] = leader2;
+    group_size[leader1] += group_size[leader2];
+}
 }
 int main(){
-    int n ,e;
-    cin >> n >> e;
+    memset(par,-1,sizeof(par));
+    memset(group_size,1,sizeof(group_size));
+    int n,e;
+    cin >> n >>e;
+    bool cycle = false;
     while(e--){
-        int a,b,c;
-        cin >> a >> b >> c;
-        adj_list[a].push_back({b,c});
-        adj_list[b].push_back({a,c});
+        int a ,b;
+        cin >> a >> b;
+        int leaderA = find(a);
+        int leaderB = find(b);
+        if(leaderA == leaderB)
+           cycle = true;
+        else
+        dsa_union(a,b);
     }
-    for(int i=0;i<n;i++){
-        dis[i] = INT_MAX;
-    }
-    dijkstra(0);
-    for(int i=0;i<n;i++){
-        cout << dis[i] << endl;
-    }
+   
+    if(cycle)
+      cout << "cycle detected\n";
+    else
+       cout <<"not detected\n";
     return 0;
 }
+// 6 6
+// 0 1
+// 1 2
+// 0 4
+// 4 5
+// 5 3
+// 3 4
